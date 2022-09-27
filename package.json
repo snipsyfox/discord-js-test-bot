@@ -1,5 +1,5 @@
 {
-  "name": "test",
+  "name": "discord-test-bot",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "discord.js": "^14.5.0",
     "typescript": "^4.8.3"
