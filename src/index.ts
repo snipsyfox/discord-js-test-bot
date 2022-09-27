@@ -1,6 +1,11 @@
 import { Client } from 'discord.js';
 import { loadEnv } from './utils/functions';
 
+declare global {
+    type int = number;
+}
+
+
 const env = loadEnv();
 
 const client = new Client({

@@ -13,3 +13,13 @@ export function loadEnv() {
     }
     return env;
 };
+export function createRandomString(len: int) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    let r = 'GENERATED_';
+    for (let i = 0; i < len; i++) {
+        r += chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    return r;
+
+}
