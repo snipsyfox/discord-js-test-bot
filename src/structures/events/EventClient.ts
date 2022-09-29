@@ -29,8 +29,10 @@ export class ListenerHandler extends EventEmitter {
     get(data: { id: string; type: 'emitter'; }): EventEmitter | undefined;
     get(data: { id: string; type: 'module'; }): Listener | undefined;
     get({ id, type }: { id: string; type?: 'emitter' | 'module'; }): EventEmitter | Listener | undefined {
-        return type && `${type}s` in this ?
-            this[`${type as 'emitter'}s`].get(id)
+        return typeof type === 'string'
+            && ['emitter', 'module'].includes(type)
+            && `${type}s` in this ?
+            this[`${type}s`].get(id)
             : this.modules.get(id);
     }
 
@@ -38,8 +40,10 @@ export class ListenerHandler extends EventEmitter {
     has(data: { id: string; type: 'emitter'; }): boolean;
     has(data: { id: string; type: 'module'; }): boolean;
     has({ id, type }: { id: string; type?: 'emitter' | 'module'; }): boolean {
-        return type && `${type}s` in this ?
-            this[`${type as 'emitter'}s`].has(id)
+        return typeof type == 'string'
+            && ['emitter', 'module'].includes(type)
+            && `${type}s` in this ?
+            this[`${type}s`].has(id)
             : this.modules.has(id);
     };
 
@@ -52,14 +56,12 @@ export class ListenerHandler extends EventEmitter {
         }
     }
 
-
     async loadAll() {
         if (this.options.emitters) {
             this.setEmitters(this.options.emitters);
         }
         const dir = this.options.directory;
         const files = await getFiles(resolve(process.cwd(), dir), true);
-        console.log(files);
 
         for (const file of files) {
             const fl = await import(file);
@@ -75,7 +77,6 @@ export class ListenerHandler extends EventEmitter {
             this.emit('load', event);
         }
     }
-
 
     get client() {
         return this.options.client;

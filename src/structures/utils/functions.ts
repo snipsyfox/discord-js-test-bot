@@ -1,3 +1,4 @@
+import { int } from '@test-bot/typings';
 import { EmbedBuilder } from 'discord.js';
 import { readFileSync, promises } from 'fs';
 import { resolve } from 'path';
@@ -51,4 +52,8 @@ export async function getFiles(dir: string, sub = true) {
 
 export function createEmbed() {
     return new EmbedBuilder();
+}
+
+export function parseTimeNumber(num: int) {
+
 }

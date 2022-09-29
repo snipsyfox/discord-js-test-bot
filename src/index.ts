@@ -1,8 +1,5 @@
 import { TestBotClient } from './structures/clients/TestBotClient';
 
-declare global {
-    type int = number;
-}
 
 
 async function main() {
