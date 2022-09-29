@@ -1,11 +1,13 @@
+import { TestBotClient } from '../clients/TestBotClient';
+import { ListenerHandler } from './EventClient';
 
 export interface ListenerOptions {
-    id: string;
+    id?: string;
     eventName: string;
     emitter: string;
 }
 
-export type eventArgs = unknown[];
+export type eventArgs = any[];
 
 export abstract class Listener implements ListenerOptions {
 
@@ -13,7 +15,8 @@ export abstract class Listener implements ListenerOptions {
     id: string;
     eventName: string;
     emitter: string;
-
+    client!: TestBotClient;
+    handler!: ListenerHandler;
 
     constructor(options: ListenerOptions) {
         this.id = Reflect.get(this, 'id') || options.id;
@@ -22,7 +25,7 @@ export abstract class Listener implements ListenerOptions {
     }
 
 
-    abstract exec(...args: eventArgs[]): unknown;
+    abstract exec(...args: eventArgs): unknown;
 
 
 }

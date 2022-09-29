@@ -27,6 +27,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
  */
 
+import { ListenerOptions } from '../events/Listener';
 import { createRandomString } from './functions';
 
 export function createMethodDecorator(fn: MethodDecorator) {
@@ -90,12 +91,20 @@ export function enumerable(val: boolean) {
 
 export function customId() {
     return createclassDecorator((cls: any): any => {
-
-        const sym = Symbol.for(`id.${cls.name}`);
-
         abstract class Extended extends cls {
-            [sym] = createRandomString(30);
+            id = createRandomString(30);
         }
         return Extended;
+    });
+}
+
+export function applyListenerOptions(options: ListenerOptions) {
+    return createclassDecorator((cls: any) => {
+        abstract class Extended extends cls {
+            constructor() {
+                super(options);
+            }
+        }
+        return Extended as any;
     });
 }

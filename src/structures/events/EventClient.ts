@@ -3,13 +3,14 @@ import { EventEmitter } from 'events';
 import { getFiles } from '../utils/functions';
 import { Listener } from './Listener';
 import { resolve } from 'path';
-
+import { TestBotClient } from '../clients/TestBotClient';
 export interface ListenerHandlerOptions {
+    client: TestBotClient<boolean>;
     directory: string;
     emitters?: Record<string, EventEmitter>;
 }
 
-export class EventClient extends EventEmitter {
+export class ListenerHandler extends EventEmitter {
     private options: ListenerHandlerOptions;
     public emitters: Collection<string, EventEmitter>;
 
@@ -45,33 +46,39 @@ export class EventClient extends EventEmitter {
     setEmitters(emitters: Record<string, EventEmitter>) {
         for (const [key, value] of Object.entries(emitters)) {
             if (this.has({ id: key, type: 'emitter' })) {
-                this.emitters.set(key, value);
+                continue;
             }
+            this.emitters.set(key, value);
         }
     }
 
 
     async loadAll() {
         if (this.options.emitters) {
-
+            this.setEmitters(this.options.emitters);
         }
         const dir = this.options.directory;
         const files = await getFiles(resolve(process.cwd(), dir), true);
+        console.log(files);
 
         for (const file of files) {
             const fl = await import(file);
             if (!fl.default) continue;
-
             const event = new fl.default();
-
             if (!(event instanceof Listener)) continue;
-
+            event.client = this.client;
+            event.handler = this;
             const handler = this.emitters.get(event.emitter);
             if (!handler) continue;
             handler.on(event.eventName, (...args) => this.modules.get(event.id)?.exec(...args));
             this.modules.set(event.id, event);
             this.emit('load', event);
         }
+    }
+
+
+    get client() {
+        return this.options.client;
     }
 
 }
