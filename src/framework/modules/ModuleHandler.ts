@@ -2,24 +2,25 @@ import { Category } from '../utils/Category';
 import { Collection } from 'discord.js';
 import { CustomModule } from './CustomModule';
 import { dirname, sep, extname } from 'path';
-import { enumerable } from '../utils/decorators';
 import { EventEmitter } from 'events';
 import { TestBotClient } from '../clients/TestBotClient';
+import { getFiles } from '../utils/functions';
 
 
-export interface ModuleHandlerEvents<T extends CustomModule> {
+export interface ModuleHandlerEvents<T extends CustomModule<any>> {
     load: [module: T, isReload: boolean];
 
 }
 
-
 export interface ModuleHandlerOptions {
-    client: TestBotClient;
+    client: TestBotClient<false>;
     directory: string;
 }
-export class ModuleHandler<T extends CustomModule> extends EventEmitter {
+export class ModuleHandler<
+    T extends CustomModule<any>,
+    Events extends ModuleHandlerEvents<CustomModule<any>>
+> extends EventEmitter {
     client: TestBotClient;
-    @enumerable(false)
     private readonly directory: string;
 
     public readonly modules: Collection<string, T>;
@@ -32,6 +33,17 @@ export class ModuleHandler<T extends CustomModule> extends EventEmitter {
         this.directory = options.directory;
         this.modules = new Collection<string, T>();
         this.categories = new Collection<string, Category<T>>;
+    }
+
+
+    async loadAll() {
+        const directory = this.directory;
+
+        const files = await getFiles(directory, true);
+
+        for (const file of files) {
+            this.load(file, false);
+        }
     }
 
     register(mod: T, filepath: string, isReload: boolean = false) {
@@ -63,43 +75,38 @@ export class ModuleHandler<T extends CustomModule> extends EventEmitter {
 
 
     load(path: string, isReload: boolean = false) {
-        if (!['js', 'mjs'].includes(extname(path))) return undefined;
+
+        if (!['.js', '.mjs'].includes(extname(path))) return undefined;
 
         const thing = require(path);
         if (!thing.default) {
+
             return undefined;
         }
+
         let mod = thing.default;
         if (!(mod.prototype instanceof CustomModule)) {
+            console.log('ehgaikghap');
+
             return undefined;
         }
         delete require.cache[require.resolve(path)];
         mod = new mod();
 
+
         if (this.modules.has(mod.id)) return undefined;
         this.register(mod, path, isReload);
-
     }
 
-    emit<
-        K extends keyof ModuleHandlerEvents<T>
-    >(
-        event: K,
-        ...args: ModuleHandlerEvents<T>[typeof event]
+    //@ts-expect-error
+    on<Key extends keyof Events>(
+        event: Key,
+        //@ts-expect-error
+        handler: (...args: Events[typeof event]) => void
     ) {
-        return super.emit(event, ...args);
+
+        //@ts-expect-error
+        return super.on(event as any, handler);
     }
-
-
-    on<
-        K extends keyof ModuleHandlerEvents<T>
-    >(
-        event: K,
-        handler: (...args: ModuleHandlerEvents<T>[typeof event]) => void
-    ) {
-        return super.on(event, handler as any);
-    }
-
-
 
 }

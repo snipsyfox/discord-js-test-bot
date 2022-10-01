@@ -1,5 +1,6 @@
 import { int } from '@test-bot/typings';
 import { EmbedBuilder } from 'discord.js';
+import * as os from 'os';
 import { readFileSync, promises } from 'fs';
 import { resolve } from 'path';
 export function loadEnv() {
@@ -55,5 +56,21 @@ export function createEmbed() {
 }
 
 export function parseTimeNumber(num: int) {
+    return num < 10 ? `0${num}` : num;
+}
+
+
+export class MemoryUtil {
+
+
+    percentage(usage: int) {
+        const total = os.totalmem() / 1024 / 1024;
+        const used = usage || process.memoryUsage().rss / 1024 / 1024;
+        console.log((100 / total) * used);
+
+        return (100 / total) * used;
+    }
+
+
 
 }

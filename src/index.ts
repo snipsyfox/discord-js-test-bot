@@ -1,4 +1,4 @@
-import { TestBotClient } from './structures/clients/TestBotClient';
+import { TestBotClient } from './framework/clients/TestBotClient';
 
 
 
@@ -9,7 +9,9 @@ async function main() {
         events: client.events,
     });
     await client.events.loadAll();
+    await client.commands.setup().loadAll();
     await client.login();
+
 }
 
 main().catch(console.error);

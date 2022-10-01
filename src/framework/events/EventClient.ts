@@ -3,27 +3,24 @@ import { EventEmitter } from 'events';
 import { getFiles } from '../utils/functions';
 import { Listener } from './Listener';
 import { resolve } from 'path';
-import { TestBotClient } from '../clients/TestBotClient';
-export interface ListenerHandlerOptions {
-    client: TestBotClient<boolean>;
-    directory: string;
-    emitters?: Record<string, EventEmitter>;
+import { ModuleHandler, ModuleHandlerEvents, ModuleHandlerOptions } from '../modules/ModuleHandler';
+export interface ListenerHandlerOptions extends ModuleHandlerOptions {
 }
 
-export class ListenerHandler extends EventEmitter {
+export interface ListenerHandlerEvents extends ModuleHandlerEvents<Listener> { }
+export class ListenerHandler extends ModuleHandler<Listener, ListenerHandlerEvents> {
     private options: ListenerHandlerOptions;
     public emitters: Collection<string, EventEmitter>;
 
     public modules: Collection<string, Listener>;
 
     constructor(options: ListenerHandlerOptions) {
-        super({
-            captureRejections: true
-        });
+        super(options);
         this.emitters = new Collection<string, EventEmitter>();
         this.modules = new Collection<string, Listener>();
         this.options = options;
     }
+
 
     get(data: { id: string; }): Listener | undefined;
     get(data: { id: string; type: 'emitter'; }): EventEmitter | undefined;
@@ -57,9 +54,6 @@ export class ListenerHandler extends EventEmitter {
     }
 
     async loadAll() {
-        if (this.options.emitters) {
-            this.setEmitters(this.options.emitters);
-        }
         const dir = this.options.directory;
         const files = await getFiles(resolve(process.cwd(), dir), true);
 
@@ -76,10 +70,6 @@ export class ListenerHandler extends EventEmitter {
             this.modules.set(event.id, event);
             this.emit('load', event);
         }
-    }
-
-    get client() {
-        return this.options.client;
     }
 
 }

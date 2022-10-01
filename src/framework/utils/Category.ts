@@ -1,11 +1,8 @@
-import { CollectionConstructor } from '@discordjs/collection';
 import { Collection } from 'discord.js';
-import { Command } from '../commands/Command';
 import { CustomModule } from '../modules/CustomModule';
 
-
 export class Category<
-    IModule extends CustomModule = CustomModule
+    IModule extends CustomModule<any> = CustomModule<any>
 > extends Collection<string, IModule> {
 
     /**
